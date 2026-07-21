@@ -116,6 +116,6 @@ The current scripts use relative paths, so run them from the directory expected 
 
 **Prototype complete through initial model training.** The next major milestone is a reproducible, tuned training pipeline followed by a Streamlit interface and deployment.
 
-## Disclaimer
+## NOTE
 
 This repository is an analytical and educational prototype. Its predictions and modelling decisions should not be used for real lending decisions without appropriate validation, governance, monitoring, fairness assessment, security review, and regulatory approval.
