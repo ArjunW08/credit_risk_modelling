@@ -1,89 +1,87 @@
 # Credit Risk Modelling
 
-This project develops a credit-risk modelling workflow for predicting loan approval outcomes from customer credit and internal product information. It brings together data ingestion, exploratory and statistical analysis, feature selection, categorical encoding, baseline model training, and evaluation.
-
-The project is currently in the research and prototyping stage. The notebooks contain the main analysis and modelling work, while reusable scripts and a user-facing application are still being developed.
+This repository contains a credit-risk modelling prototype for predicting loan approval outcomes using customer credit bureau and internal product data. It combines data ingestion, exploratory analysis, feature screening, baseline model training, and a Streamlit inference application.
 
 ## Project Goals
 
 - Understand the structure and business meaning of the available credit-risk data.
-- Combine internal product data with CIBIL credit-score data using the prospect identifier.
-- Clean and select useful numerical and categorical features.
-- Compare baseline classification models for the `Approved_Flag` target.
-- Improve the best baseline model and make predictions available through a simple application.
+- Join internal product data with CIBIL bureau data via `PROSPECTID`.
+- Clean, filter, and encode numerical and categorical features.
+- Train and compare baseline classifiers for the `Approved_Flag` target.
+- Expose a simple decision-support interface using a trained model.
 
 ## Data
 
-The project uses the following data sources:
+The repository includes both raw Excel files and compressed `.zst` archives for:
 
-- `internal_product.xlsx`: internal customer and product-level information.
-- `cibil_score.xlsx`: credit history and bureau-related features.
-- `feature_target_description.xlsx`: feature and target descriptions.
+- `data/internal_product.xlsx` / `data/internal_product.xlsx.zst`
+- `data/cibil_score.xlsx` / `data/cibil_score.xlsx.zst`
+- `data/feature_target_description.xlsx` / `data/feature_target_description.xlsx.zst`
 
-The source files currently stored in the repository are compressed as `.xlsx.zst` archives. They need to be decompressed into `.xlsx` files before running the current ingestion workflow. Raw Excel files are ignored by Git through [.gitignore](.gitignore), while the SQLite database generated from the data is available at [data/credit_modelling.db](data/credit_modelling.db).
+A SQLite database artifact is also available at `data/credit_modelling.db`.
 
-The modelling target is `Approved_Flag`. The project also documents relevant credit-risk concepts such as DPD, PAR, NPA, GNPA, NNPA, and credit-card utilization in [domain_knowledge.md](domain_knowledge.md).
+The modelling target is `Approved_Flag`. Relevant credit-risk concepts are documented in [domain_knowledge.md](domain_knowledge.md).
 
 ## Workflow
 
 1. **Data ingestion**
-   - Load the Excel datasets with pandas.
-   - Store the source tables in SQLite for repeatable access.
-   - Initial ingestion logic is available in [notebooks/data_ingestion.ipynb](notebooks/data_ingestion.ipynb) and [scripts/data_analysis/ingestion_db.py](scripts/data_analysis/ingestion_db.py).
+   - Load the source Excel datasets with pandas.
+   - Persist tables in SQLite for repeatable analysis.
+   - Use [scripts/data/ingestion_db.py](scripts/data/ingestion_db.py) as the primary ingestion entry point.
 
 2. **Data analysis and preparation**
    - Merge the internal and CIBIL datasets on `PROSPECTID`.
-   - Treat categorical and numerical features separately.
-   - Handle the `-99999` sentinel used for missing values.
-   - Use chi-square tests for categorical features, ANOVA for numerical features against the categorical target, and sequential VIF filtering for multicollinearity.
-   - Encode `EDUCATION` ordinally and apply one-hot encoding to nominal features.
-   - The analysis is documented in [notebooks/dataset_analysis.ipynb](notebooks/dataset_analysis.ipynb), with reusable functions in [scripts/data_analysis/data_processing.py](scripts/data_analysis/data_processing.py).
+   - Separate categorical and numerical features.
+   - Handle sentinel values such as `-99999` used for missing data.
+   - Perform chi-square testing for categorical features, ANOVA for numerical features, and VIF filtering for multicollinearity.
+   - Encode `EDUCATION` ordinally and one-hot encode nominal categories.
+   - Use [scripts/data/data_processing.py](scripts/data/data_processing.py) for reusable preprocessing helpers.
 
-3. **Baseline modelling**
-   - Train and compare Decision Tree, Random Forest, and XGBoost classifiers.
-   - Review accuracy and the confusion matrix while considering the imbalance in the target classes.
-   - The current experiments are in [notebooks/model_training.ipynb](notebooks/model_training.ipynb).
+3. **Model training**
+   - Train baseline classifiers, compare evaluation metrics, and review confusion matrices.
+   - Use [scripts/model_creation/train.py](scripts/model_creation/train.py) for training.
+   - Use [scripts/model_creation/model_evaluation.py](scripts/model_creation/model_evaluation.py) for model assessment.
+
+4. **Inference and application**
+   - Generate predictions with the trained model in `models/predict_loan_possibility_model.pkl`.
+   - Run the Streamlit UI in [app.py](app.py) for interactive loan risk assessment.
+   - A simplified inference script is available at [scripts/inference/predict_loan_possibility.py](scripts/inference/predict_loan_possibility.py).
 
 ## What Has Been Achieved
 
-- Added the initial project datasets and a SQLite database artifact.
-- Created a data-ingestion notebook and a reusable ingestion script.
-- Merged the available data sources and documented the feature categories.
-- Investigated missing-value markers and implemented data-cleaning helpers.
-- Implemented statistical feature-screening utilities:
-  - chi-square testing for categorical variables,
-  - ANOVA for numerical variables,
-  - sequential VIF-based multicollinearity filtering.
-- Implemented categorical feature encoding, including the current ordinal mapping for `EDUCATION` and one-hot encoding for selected nominal columns.
-- Trained and compared initial classification models.
-- Recorded the current baseline results in the modelling notebook:
-  - Decision Tree: approximately 71% accuracy,
-  - Random Forest: approximately 76% accuracy,
-  - XGBoost: approximately 77.5% accuracy.
-- Identified XGBoost as the current baseline model for further improvement.
-- Added a baseline confusion-matrix artifact at [assets/confusion_matrix.png](assets/confusion_matrix.png).
+- Added the core dataset files and a SQLite database artifact.
+- Built a reusable ingestion script and a data-ingestion notebook.
+- Merged CIBIL and internal product tables and documented feature roles.
+- Implemented missing-value handling and categorical encoding helpers.
+- Added statistical feature-screening utilities for categorical and numerical covariates.
+- Implemented baseline model training and evaluation experiments.
+- Included a Streamlit application for model inference.
+- Stored the current trained model at `models/predict_loan_possibility_model.pkl`.
 
 ## Work In Progress
 
-- Write up and consolidate the exploratory data analysis, including charts and business interpretation.
-- Tune the XGBoost model using methods such as GridSearchCV, RandomizedSearchCV, or Bayesian optimization.
-- Evaluate metrics beyond accuracy, especially class-wise precision, recall, F1-score, and other metrics appropriate for an imbalanced target.
-- Add feature engineering and scaling experiments where they improve the selected models.
-- Create a production-oriented `train.py` entry point for repeatable training and evaluation.
-- Resolve the ingestion path and compressed-file handling so a fresh checkout can be prepared without manual adjustments.
-- Build a Streamlit interface for interactive predictions and model results.
-- Package and deploy the application.
+- Consolidate exploratory analysis and chart-driven business interpretation.
+- Tune the XGBoost baseline using systematic hyperparameter search.
+- Evaluate additional metrics such as precision, recall, F1-score, and class-specific performance.
+- Add targeted feature engineering, scaling, and robustness checks.
+- Harden the training pipeline for repeatable `train.py` execution.
+- Improve the data ingestion/refactoring path for fresh repository setup.
+- Expand the Streamlit app with clearer guidance and deployment-ready packaging.
 
 ## Repository Structure
 
 ```text
 .
-├── assets/                 # Saved modelling artifacts and visualizations
-├── data/                   # Compressed source data and SQLite database
-├── notebooks/              # Ingestion, analysis, and modelling experiments
+├── app.py                  # Streamlit inference app
+├── assets/                 # Saved visuals and artifact images
+├── data/                   # Source Excel files, compressed archives, and SQLite DB
+├── models/                 # Trained model artifacts
+├── notebooks/              # Exploratory and modelling notebooks
 ├── scripts/
-│   └── data_analysis/      # Reusable ingestion and preprocessing helpers
-├── domain_knowledge.md     # Credit-risk and banking terminology
+│   ├── data/               # Ingestion and preprocessing helpers
+│   ├── inference/          # Prediction and inference helpers
+│   └── model_creation/     # Training and evaluation scripts
+├── domain_knowledge.md     # Credit-risk terminology and notes
 └── README.md
 ```
 
@@ -93,28 +91,41 @@ The modelling target is `Approved_Flag`. The project also documents relevant cre
 
 - Python 3.10 or newer
 - Jupyter Notebook or JupyterLab
-- pandas, NumPy, SciPy, statsmodels, SQLAlchemy, scikit-learn, and XGBoost
-- `zstd` if the compressed source files need to be decompressed locally
+- pandas, NumPy, SciPy, statsmodels, SQLAlchemy, scikit-learn, XGBoost, Streamlit, joblib
+- `zstd` if you need to decompress `.zst` source files locally
 
-Install the core Python dependencies in a virtual environment:
+Install the dependencies in a virtual environment:
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-pip install pandas numpy scipy statsmodels sqlalchemy scikit-learn xgboost jupyter openpyxl
+pip install pandas numpy scipy statsmodels sqlalchemy scikit-learn xgboost streamlit joblib openpyxl
 ```
 
-Decompress the source files into the `data/` directory, then run the notebooks in this order:
+If you only have the compressed source files, decompress them into `data/`:
 
-1. `notebooks/data_ingestion.ipynb`
-2. `notebooks/dataset_analysis.ipynb`
-3. `notebooks/model_training.ipynb`
+```bash
+zstd -d data/internal_product.xlsx.zst
+zstd -d data/cibil_score.xlsx.zst
+zstd -d data/feature_target_description.xlsx.zst
+```
 
-The current scripts use relative paths, so run them from the directory expected by each script or update the paths as part of the ingestion refactor.
+### Script-driven execution
+
+1. `python scripts/data/ingestion_db.py`
+2. `python scripts/data/data_processing.py`
+3. `python scripts/model_creation/train.py`
+4. `python scripts/model_creation/model_evaluation.py`
+
+To launch the loan risk assessment UI:
+
+```bash
+streamlit run app.py
+```
 
 ## Current Status
 
-**Prototype complete through initial model training.** The next major milestone is a reproducible, tuned training pipeline followed by a Streamlit interface and deployment.
+Prototype complete through initial model training and a Streamlit inference interface. Next steps are a reproducible training pipeline, stronger model tuning, and a deployment-ready application.
 
 ## NOTE
 

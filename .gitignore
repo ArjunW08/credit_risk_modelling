@@ -1,4 +1,4 @@
 /data/*.xlsx
 /logs
 .vscode/
-
+__pycache__/
