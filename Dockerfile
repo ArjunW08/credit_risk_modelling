@@ -28,14 +28,15 @@ ENV PATH="/opt/conda/envs/crm/bin:$PATH" \
 RUN groupadd --gid 1000 appuser && \
     useradd --uid 1000 --gid appuser --create-home appuser
 
-# Copy application source code
-# (data, models, logs, and notebooks are excluded by .dockerignore
-#  and are bind-mounted at runtime instead)
+# Copy application source code, data, and models
+# (raw archives and notebooks are still excluded by .dockerignore)
 COPY app.py .
 COPY scripts/ scripts/
+COPY data/ data/
+COPY models/ models/
 
-# Create mount-point directories so bind mounts work cleanly
-RUN mkdir -p data models logs && \
+# Ensure proper permissions and create logs directory
+RUN mkdir -p logs && \
     chown -R appuser:appuser /app
 
 USER appuser
@@ -43,13 +44,14 @@ USER appuser
 # Streamlit configuration: disable telemetry, set server defaults
 ENV STREAMLIT_BROWSER_GATHER_USAGE_STATS=false \
     STREAMLIT_SERVER_HEADLESS=true \
-    STREAMLIT_SERVER_PORT=8501 \
     STREAMLIT_SERVER_ADDRESS=0.0.0.0
 
-EXPOSE 8501
+# Provide a default PORT if the host doesn't inject one (Render will inject this)
+ENV PORT=8501
+EXPOSE $PORT
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:8501/_stcore/health || exit 1
+    CMD curl -f http://localhost:$PORT/_stcore/health || exit 1
 
-# Default command: run the Streamlit inference app
-CMD ["streamlit", "run", "app.py"]
+# Default command: run the Streamlit inference app, respecting the dynamic PORT
+CMD sh -c "streamlit run app.py --server.port $PORT"

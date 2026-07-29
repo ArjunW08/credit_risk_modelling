@@ -17,13 +17,12 @@ venv
 *.swp
 *.swo
 
-# Data files — bind-mounted at runtime, not baked into the image
+# Data files (raw archives ignored, database included for deployment)
 data/*.xlsx
 data/*.zst
-data/*.db
 
-# Model artifacts — bind-mounted at runtime
-models/*.pkl
+# Model artifacts (included for deployment)
+# (removed models/*.pkl so the model is baked into the image)
 
 # Notebooks — not needed in the production image
 notebooks/
