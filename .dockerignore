@@ -1,0 +1,42 @@
+# Version control
+.git
+.gitignore
+
+# Python artifacts
+__pycache__
+*.pyc
+*.pyo
+.venv
+venv
+.mypy_cache
+.pytest_cache
+
+# IDE / editor
+.vscode
+.idea
+*.swp
+*.swo
+
+# Data files — bind-mounted at runtime, not baked into the image
+data/*.xlsx
+data/*.zst
+data/*.db
+
+# Model artifacts — bind-mounted at runtime
+models/*.pkl
+
+# Notebooks — not needed in the production image
+notebooks/
+
+# Logs — generated at runtime
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation assets
+assets/
+domain_knowledge.md
+eda.md
+README.md

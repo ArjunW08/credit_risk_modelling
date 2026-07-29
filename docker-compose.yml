@@ -1,0 +1,30 @@
+services:
+  # ── Streamlit inference app (default service) ──────────────
+  app:
+    build: .
+    container_name: credit-risk-app
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+
+  # ── Training pipeline (opt-in, manual invocation) ──────────
+  train:
+    build: .
+    container_name: credit-risk-train
+    profiles:
+      - train
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./logs:/app/logs
+    command: ["python", "scripts/entrypoint_train.py"]
