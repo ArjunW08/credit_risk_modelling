@@ -2,6 +2,8 @@
 
 A credit-risk modelling prototype that predicts loan approval outcomes (P1–P4 risk bands) using customer credit bureau and internal product data. The project covers end-to-end data ingestion, feature engineering, model training, and a Streamlit inference application — all containerised with Docker.
 
+Live Project Link [here](https://credit-risk-modelling-6815.onrender.com/)
+
 ## Project Goals
 
 - Join internal product data with CIBIL bureau data via `PROSPECTID`.
